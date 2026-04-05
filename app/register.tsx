@@ -251,20 +251,23 @@ export default function RegisterScreen() {
     };
 
     try {
-      // Arka plan işlemini servise devret
-      await authService.register(payload);
+      // Servisi çağır ve yanıtı bir değişkene al
+      const result = await authService.register(payload);
       
-      // Başarılıysa kullanıcıyı bilgilendir ve yönlendir
+      // Eğer servis hata fırlatmadıysa ama boş döndüyse (Network hatası vb.)
+      if (!result) {
+        throw new Error("Sunucudan yanıt alınamadı. İnternet bağlantınızı veya IP adresini kontrol edin.");
+      }
+
+      // Başarılıysa kullanıcıyı bilgilendir
       Alert.alert(
         '⚔️ Kahraman Doğdu!',
         `Hesabın "${payload.username}" adıyla oluşturuldu. Artık giriş yapabilirsin.`,
         [{ text: 'Giriş Yap', onPress: () => router.push('/') }]
       );
     } catch (err: any) {
-      // Hata gelirse ekranda göster
-      Alert.alert('🔥 Kayıt Hatası', err.message);
-    } finally {
-      setLoading(false);
+      // Servis içindeki throw Error(data.error) buraya düşecek
+      Alert.alert('🔥 Kayıt Hatası', err.message || "Bilinmeyen bir hata oluştu.");
     }
   };
 
